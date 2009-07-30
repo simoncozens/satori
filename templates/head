@@ -1,0 +1,15 @@
+<html>
+    <head>
+    <link type="text/css" href="http://jqueryui.com/latest/themes/base/ui.all.css" rel="stylesheet" />
+    <link type="text/css" href="/satori-chrome/site.css" rel="stylesheet" />
+    <title>Satori</title>
+  <script type="text/javascript" src="http://jqueryui.com/latest/jquery-1.3.2.js"></script>
+  <script type="text/javascript" src="http://jqueryui.com/latest/ui/ui.core.js"></script>
+  <script type="text/javascript" src="http://jqueryui.com/latest/ui/ui.tabs.js"></script>
+  <script type="text/javascript" src="http://jqueryui.com/latest/ui/ui.accordion.js"></script>
+
+    </head>
+    <body>
+
+<div class="header"><h1>Satori</h1></div>
+[% IF message %]<div id="message">[%message|html%]</div>[%END%]

@@ -1,0 +1,39 @@
+[% INCLUDE head %]
+    <script type="text/javascript">
+        $(document).ready(function(){ 
+            $("#tabs").tabs({fx: { opacity: 'toggle', duration: 'fast' } }); 
+            $(".accordion").accordion({header: "h3", autoHeight: false,
+            collapsible: true, active:1});
+        [% IF query.param("server") %]
+            $("#tabs").tabs("select", "#server-[%query.param("server")%]");
+        [% END %]
+        }); 
+    </script>
+<div class="main" id="tabs">
+[% PROCESS macros %]
+    <ul>
+[% FOR server = servers.keys; %]
+        <li><a href="#server-[%server%]"><span>[%server%]</span></a></li>
+[% END %]
+    </ul>
+[% FOR server = servers.keys; SET details = servers.$server %]
+<div class="server accordion" id="server-[%server%]">
+    [% SET speed = details.mhz / 1000; SET mem = details.memory / (1024*1024); %]
+    <h3> Server configuration</h3>
+    <div class="serverconfig">
+    <table> 
+        <tr><th>CPU</th><td>[% details.model %] ([%details.cores%] cores x [%details.cpus%] CPUs @ [%speed | format("%.2f") %]GHz)</td></tr>
+        <tr><th>Threads</th><td>[% details.threads %]</td></tr>
+        <tr><th>Installed Memory</th><td>[% mem|format("%.2f") %] Gb</td></tr>
+    </table>
+    </div>
+    <h3> VMs </h3>
+    <div class="vms">
+    <table>
+    [% FOR node = details.running_hosts; show_running_node(server,node); END %]
+    [% FOR node = details.known_hosts; show_inactive_node(server,node); END %]
+    </table>
+    </div>
+</div>
+[% END %]
+[% INCLUDE tail %]

@@ -1,0 +1,34 @@
+[% MACRO show_host_info(server,node) BLOCK; %]
+[% IF query.param("rm") == "hostinfo" AND query.param("server") == server AND query.param("node") == node.get_name%]
+    <tr><td>&nbsp</td><td colspan="3">Maximum Memory</td><td>[%
+    (info.maxMem / 1024) |format("%d") %]M</td></tr>
+    <tr><td>&nbsp</td><td colspan="3">Current Memory</td><td>[%
+    (info.memory / 1024) |format("%d")%]M</td></tr>
+    <tr><td>&nbsp</td><td colspan="3">Status</td><td>[%status%]</td></tr>
+[% END %]
+[%END %]
+
+[% MACRO show_running_node(server,node) BLOCK; %]
+<tr><td><img src="/satori-chrome/tick.png"></td>
+<td><a href="?rm=hostinfo&server=[%server%]&node=[%node.get_name%]">[%node.get_name%]</a></td>
+<td><a href="?rm=hostinfo&server=[%server%]&node=[%node.get_name%]"><img
+src="/satori-chrome/info.png" title="Info"></a></td>
+[% IF node.get_name != "Domain-0" %]
+<td><a href="?rm=action&action=reboot&server=[%server%]&node=[%node.get_name%]"><img src="/satori-chrome/reboot.png" title="Reboot"></a></td>
+<td><a href="?rm=action&action=shutdown&server=[%server%]&node=[%node.get_name%]"><img
+src="/satori-chrome/shutdown.png" title="Shutdown"></a></td>
+[% END %]
+</tr>
+[% show_host_info(server,node) %]
+[% END %]
+[% MACRO show_inactive_node(server,node) BLOCK; %]
+<tr><td><img src="/satori-chrome/cross.png"></td>
+<td><a href="?rm=hostinfo&server=[%server%]&node=[%node.get_name%]">[%node.get_name%]</a></td>
+<td><a href="?rm=hostinfo&server=[%server%]&node=[%node.get_name%]"><img
+src="/satori-chrome/info.png" title="Info"></a></td>
+<td><a
+href="?rm=action&action=create&server=[%server%]&node=[%node.get_name%]"><img
+src="/satori-chrome/tick.png" title="Start"></a></td>
+</tr>
+[% show_host_info(server,node) %]
+[% END %]
