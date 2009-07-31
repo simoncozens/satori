@@ -33,6 +33,10 @@ sub list_nodes {
         ($vmm->list_domains(), $vmm->list_defined_domains());
         $details->{$_}{running_hosts} = [ $vmm->list_domains() ] ;
         $details->{$_}{known_hosts} = [ $vmm->list_defined_domains() ] ;
+        $details->{$_}{storage_pools} = {
+            map { $_->get_name() => $_->get_info() }
+            $vmm->list_storage_pools() 
+        };
     }
     $self->tt_params(message => $messages);
     return $self->tt_process('list-nodes.tt',{servers => $details});
@@ -120,3 +124,19 @@ sub disks {
     return @disks;
 }
 
+package Template::Plugin::HumanBytes;
+$INC{"Template/Plugin/HumanBytes.pm"}++;
+use base 'Template::Plugin::Filter';
+sub init {
+   my $self = shift;
+   my $name = $self->{ _ARGS }->[0] || 'humanbytes';
+   warn "Init called";
+   $self->install_filter($name);
+   return $self;
+}
+use Number::Bytes::Human 'format_bytes';
+sub filter { format_bytes($_[1]) }
+
+
+
+1;

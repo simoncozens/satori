@@ -1,9 +1,8 @@
+[% USE HumanBytes %]
 [% MACRO show_host_info(server,node) BLOCK; %]
 [% IF query.param("rm") == "hostinfo" AND query.param("server") == server AND query.param("node") == node.get_name%]
-    <tr><td>&nbsp</td><td colspan="3">Maximum Memory</td><td>[%
-    (info.maxMem / 1024) |format("%d") %]M</td></tr>
-    <tr><td>&nbsp</td><td colspan="3">Current Memory</td><td>[%
-    (info.memory / 1024) |format("%d")%]M</td></tr>
+    <tr><td>&nbsp</td><td colspan="3">Maximum Memory</td><td>[% (1024*info.maxMem )| humanbytes %]</td></tr>
+    <tr><td>&nbsp</td><td colspan="3">Current Memory</td><td>[% (1024*info.memory )| humanbytes%]</td></tr>
     <tr><td>&nbsp</td><td colspan="3">Status</td><td>[%status%]</td></tr>
 [% END %]
 [%END %]
@@ -31,4 +30,12 @@ href="?rm=action&action=create&server=[%server%]&node=[%node.get_name%]"><img
 src="/satori-chrome/tick.png" title="Start"></a></td>
 </tr>
 [% show_host_info(server,node) %]
+[% END %]
+[% MACRO display_pool(pool) BLOCK; %]
+<table>
+<tr><td colspan="3">[% pool %]</td></tr>
+<tr><th>Logical size</th><td>[% details.storage_pools.$pool.capacity |humanbytes %]</td></tr>
+<tr><th>Physical size</th><td>[% details.storage_pools.$pool.allocation |humanbytes%]</td></tr>
+<tr><th>Available size</th><td>[% details.storage_pools.$pool.available |humanbytes%]</td></tr>
+</table>
 [% END %]
