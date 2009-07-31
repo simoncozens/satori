@@ -101,3 +101,22 @@ sub state_as_text {
     }
     return "unknown";
 }
+
+sub disks {
+    # This is a bit TM-specific, although not much.
+    my $self = shift;
+    my $conn = shift;
+    my $config = $self->get_xml_description();
+    # "Parse" XML.
+    my (@devices) = $config =~ /<source dev='([^']+)'/g;
+    my @pools = $conn->list_storage_pools();
+    my @disks;
+    for my $dev (@devices) {
+        for my $pool (@pools) {
+            my $node = eval { $pool->get_volume_by_name($dev) };
+            if ($node) { push @disks, $node; last }
+        }
+    }
+    return @disks;
+}
+
