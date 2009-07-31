@@ -34,7 +34,12 @@ sub list_nodes {
         $details->{$_}{running_hosts} = [ $vmm->list_domains() ] ;
         $details->{$_}{known_hosts} = [ $vmm->list_defined_domains() ] ;
         $details->{$_}{storage_pools} = {
-            map { $_->get_name() => $_->get_info() }
+            map {
+                my $i = $_->get_info(); $i->{volumes} = { 
+                    map {$_->get_name() => $_->get_info() }
+                    $_->list_volumes }; 
+                 $_->get_name() => $i;
+            }
             $vmm->list_storage_pools() 
         };
     }

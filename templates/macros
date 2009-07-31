@@ -37,5 +37,9 @@ src="/satori-chrome/tick.png" title="Start"></a></td>
 <tr><th>Logical size</th><td>[% details.storage_pools.$pool.capacity |humanbytes %]</td></tr>
 <tr><th>Physical size</th><td>[% details.storage_pools.$pool.allocation |humanbytes%]</td></tr>
 <tr><th>Available size</th><td>[% details.storage_pools.$pool.available |humanbytes%]</td></tr>
+[%SET vols = details.storage_pools.$pool.volumes %]
+[% FOR v = vols.keys.sort %]
+<tr><td>[%v%]</td><td>[%vols.$v.capacity | humanbytes%]</td></tr>
+[% END %]
 </table>
 [% END %]
