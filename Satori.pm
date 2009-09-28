@@ -31,7 +31,10 @@ sub list_nodes {
         $details->{$_} = $vmm->get_node_info;
         my %all_hosts = map { $_->get_uuid_string => $_ }
         ($vmm->list_domains(), $vmm->list_defined_domains());
-        $details->{$_}{running_hosts} = [ $vmm->list_domains() ] ;
+        $details->{$_}{running_hosts} = [ 
+            grep {$_->get_info()->{state} > 1}
+            $vmm->list_domains()
+        ] ;
         $details->{$_}{known_hosts} = [ $vmm->list_defined_domains() ] ;
         $details->{$_}{storage_pools} = {
             map {
@@ -66,29 +69,25 @@ sub node_action {
     my $self = shift;
     my $node = $self->query->param("node");
     my $action = $self->query->param("action");
-    if ($action !~ /^(reboot|shutdown|create)/) {
-        $self->tt_params(message => "I don't know what '$action' is");
-        return list_nodes($self);
+    if ($action !~ /^(reboot|shutdown|create|migrate)/) {
+        return qq/{ error: "I don't know what '$action' is" }/;
     }
     if ($node eq "Domain-0") {
-        $self->tt_params(message => "Cowardly refusing to $action Domain-0");
-        return list_nodes($self);
+        return qq/{ error: "Cowardly refusing to $action Domain-0" }/;
     }
     my $vmm = eval { Sys::Virt->new(address => "xen+tls://".$self->query->param("server")) };
-    if (!$vmm) { 
-        $self->tt_params(message => "Couldn't get a handle on server");
-        return list_nodes($self);
-    }
+    if (!$vmm) { return qq/{ error: "Couldn't get a handle on server" }/; }
     my $n = $vmm->get_domain_by_name($node);
-    if (!$n) { 
-        $self->tt_params(message => "Couldn't get a handle on $node");
-        return list_nodes($self);
-    }
-    $n->$action();
-    $self->tt_params(message => "Performed a $action on node $node");
-    return list_nodes($self);
-
+    if (!$n) { return qq/{ error: "Couldn't get a handle on $node" }/; }
+    if ($action eq "migrate") {
+        my $dest = eval { Sys::Virt->new(address => "xen+tls://".$self->query->param("destination")) };
+        if (!$dest) { return qq/{ error: "Couldn't get a handle on destination server" }/; }
+        $n->migrate($dest, Sys::Virt::Domain::MIGRATE_LIVE,"","",0);
+    } elsif ($action eq "reboot") { $n->reboot(0) }
+    else { $n->$action(); }
+    return qq/{message: "Performed a $action on node $node" }/;
 }
+
 package Sys::Virt::Domain;
 sub state_as_text {
     my $self = shift;

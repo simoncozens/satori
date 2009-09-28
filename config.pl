@@ -1,3 +1,4 @@
+use TextMatters::XenInstance;
 {
-    servers => ["grandmal", "pox"],
+    servers => [TextMatters::XenInstance->list_servers],
 }

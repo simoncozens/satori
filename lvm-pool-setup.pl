@@ -5,6 +5,7 @@ my $xml = q{
         <name>vg0</name>
         <source>
           <device path="/dev/sda2"/>
+          <device path="/dev/sdb2"/>
         </source>
         <target>
           <path>/dev/vg0</path>

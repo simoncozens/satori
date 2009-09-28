@@ -12,6 +12,7 @@
     </script>
 <div class="main" id="tabs">
 [% PROCESS macros %]
+[% reboot_script %]
     <ul>
 [% FOR server = servers.keys; %]
         <li><a href="#server-[%server%]"><span>[%server%]</span></a></li>

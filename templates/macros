@@ -13,9 +13,9 @@
 <td><a href="?rm=hostinfo&server=[%server%]&node=[%node.get_name%]"><img
 src="/satori-chrome/info.png" title="Info"></a></td>
 [% IF node.get_name != "Domain-0" %]
-<td><a href="?rm=action&action=reboot&server=[%server%]&node=[%node.get_name%]"><img src="/satori-chrome/reboot.png" title="Reboot"></a></td>
-<td><a href="?rm=action&action=shutdown&server=[%server%]&node=[%node.get_name%]"><img
-src="/satori-chrome/shutdown.png" title="Shutdown"></a></td>
+<td>[% reboot_button(server, node) %]</td>
+<td>[% shutdown_button(server, node) %]</td>
+<td>[% migrate_button(server, node) %]</td>
 [% END %]
 </tr>
 [% show_host_info(server,node) %]
@@ -25,10 +25,7 @@ src="/satori-chrome/shutdown.png" title="Shutdown"></a></td>
 <td><a href="?rm=hostinfo&server=[%server%]&node=[%node.get_name%]">[%node.get_name%]</a></td>
 <td><a href="?rm=hostinfo&server=[%server%]&node=[%node.get_name%]"><img
 src="/satori-chrome/info.png" title="Info"></a></td>
-<td><a
-href="?rm=action&action=create&server=[%server%]&node=[%node.get_name%]"><img
-src="/satori-chrome/tick.png" title="Start"></a></td>
-</tr>
+<td>[% create_button(server,node) %]</td>
 [% show_host_info(server,node) %]
 [% END %]
 [% MACRO display_pool(pool) BLOCK; %]
@@ -43,3 +40,90 @@ src="/satori-chrome/tick.png" title="Start"></a></td>
 [% END %]
 </table>
 [% END %]
+
+[% MACRO reboot_button(server,node) BLOCK; %]
+<a href="javascript:takeAction('reboot','[%server%]','[%node.get_name%]')"><img src="/satori-chrome/reboot.png" title="Reboot"></a>
+[% END %]
+
+[% MACRO shutdown_button(server, node) BLOCK; %]
+<a href="javascript:takeAction('shutdown','[%server%]','[%node.get_name%]')"><img
+src="/satori-chrome/shutdown.png" title="Shutdown"></a>
+[% END %]
+
+[% MACRO create_button(server, node) BLOCK; %]
+<a href="javascript:takeAction('create', '[%server%]','[%node.get_name%]')"><img src="/satori-chrome/tick.png" title="Start"></a>
+[% END %]
+
+[% MACRO migrate_button(serve, node) BLOCK; %]
+<a href="javascript:migrate('[%server%]','[%node.get_name%]')"><img
+src="/satori-chrome/migrate.png" title="Migrate"></a></td>
+[% END %]
+
+[% MACRO reboot_script BLOCK; %]
+<div class="dbox" id="dialog" title="Confirm">
+    <p>
+    <span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>
+    Do you really want to <span id="dialogwilldo"></span>?
+    </p>
+</div>
+<div class="dbox" id="migrate" title="Migrate host">
+    <form>
+    <fieldset>
+        <label for="destination">Destination node?</label>
+        <input type="text" name="destination" id="destination" class="text ui-widget-content ui-corner-all" />
+    </fieldset>
+    </form>
+</div>
+
+    
+<script type="text/javascript">
+    $(function() { $(".dbox").dialog({ autoOpen: false, modal: true,
+        buttons: {
+        "Ok": function () {}, 
+        "Cancel": function() { } 
+        }
+    }); });
+    function migrate(server,nodename) {
+        $('#migrate').dialog('option', 'buttons',  {
+            "Ok": function() {
+                if($("#destination").val()) {
+                    $.getJSON("", {
+                        rm: "action", "action": "migrate", "server": server,
+                        "node": nodename, "destination": $("#destination").val()
+                    }, function(data) {
+                        $("#migrate").dialog("close");
+                        console.log(data);
+                        if (data.error) { alert(data.error) }
+                        else { alert(data.message); location.reload() }
+                    });
+                } else {
+                    alert("You need to supply a destination host");
+                }
+            }, "Cancel": function() { $(this).dialog("close");} } );
+        $("#destination").val("");
+        $("#migrate").dialog("open");
+    }
+    function takeAction(action, server, nodename) {
+        $("#dialogwilldo").text(action+" "+nodename);
+        $('#dialog').dialog('option', 'buttons',  {
+            "Ok": function() {
+                reallyTakeAction(action,server, nodename); 
+            }, "Cancel": function() { $(this).dialog("close");} } );
+        $("#dialog").dialog("open");
+    }
+    function reallyTakeAction(action, server, nodename) {
+        $.getJSON("", {
+            rm: "action",
+            "action": action,
+            "server": server,
+            "node": nodename,
+        }, function(data) {
+            $("#dialog").dialog("close");
+            if (data.error) { alert(data.error) }
+            else { alert(data.message); location.reload() }
+        });
+    }
+</script>
+[% END %]
+
+
