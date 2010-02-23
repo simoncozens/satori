@@ -47,7 +47,7 @@ sub list_nodes {
         };
     }
     $self->tt_params(message => $messages);
-    return $self->tt_process('list-nodes.tt',{servers => $details});
+    return $self->tt_process('list-nodes',{servers => $details});
 }
 
 sub host_info {
